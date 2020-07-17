@@ -1,6 +1,6 @@
 /**
  * @author Fabian Dean Flores
- * @summary A test server for a function that returns a screenshot of a BMI growth chart to be used
+ * @summary A server for a function that returns a screenshot of a BMI growth chart to be used
  * in the Easy BMI app. Puppeteer is used to take the screenshot from a tool provided by the CDC.
  */
 require('dotenv').config()

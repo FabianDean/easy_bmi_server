@@ -1,7 +1,7 @@
 {
   "name": "easy_bmi_server",
   "version": "1.0.0",
-  "description": "Testing environment for a serverless function to be deployed on AWS Lambda. The function will receive things like weight, height, etc. and return a BMI growth chart.",
+  "description": "This server will supply an endpoint that accepts a measurement system, gender, age, weight & height and return a BMI growth chart.",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
