@@ -37,13 +37,22 @@ app.get('/bmichart', async (req, res) => {
     const selector = process.env.SELECTOR;
     const selectorToRemove = process.env.SELECTOR_TO_REMOVE;
 
-    const browser = await puppeteer.launch();
+    const browser = await puppeteer.launch({
+        headless: true,
+        args: [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage',
+            '--single-process'
+        ],
+    });
     const page = await browser.newPage();
 
     // catch all error handling for now
     // error likely due to params being of incorrect types
     try {
-        await page.goto(`${baseURL}method=${data.system}&gender=${data.gender}&age_y=0&age_m=${data.age}&h${data.system === 'metric' ? 'cm' : 'inches'}=${data.height}&${data.system === 'metric' ? 'wkg' : 'twp'}=${data.weight}`);
+        await page.goto(`${baseURL}method=${data.system}&gender=${data.gender}&age_y=0&age_m=${data.age}&h${data.system === 'metric' ? 'cm' : 'inches'}=${data.height}&${data.system === 'metric' ? 'wkg' : 'twp'}=${data.weight}`,
+            { timeout: 60000, waitUntil: 'domcontentloaded' });
     } catch {
         res.status(500).send('Error fetching chart');
     }
