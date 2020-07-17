@@ -1,0 +1,24 @@
+{
+  "name": "easy_bmi_server",
+  "version": "1.0.0",
+  "description": "Testing environment for a serverless function to be deployed on AWS Lambda. The function will receive things like weight, height, etc. and return a BMI growth chart.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon index.js",
+    "start_once": "node index.js"
+  },
+  "keywords": [
+    "BMI",
+    "growth",
+    "chart"
+  ],
+  "author": "Fabian Dean Flores",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "nodemon": "^2.0.4",
+    "puppeteer": "^5.1.0"
+  }
+}
