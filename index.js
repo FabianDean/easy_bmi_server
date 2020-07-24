@@ -6,6 +6,10 @@
 require('dotenv').config()
 const express = require('express');
 const puppeteer = require('puppeteer');
+const PDFDocument = require('pdfkit');
+const moment = require('moment');
+const tmp = require('tmp');
+const fs = require('fs');
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -37,15 +41,21 @@ app.get('/bmichart', async (req, res) => {
     const selector = process.env.SELECTOR;
     const selectorToRemove = process.env.SELECTOR_TO_REMOVE;
 
-    const browser = await puppeteer.launch({
-        headless: true,
-        args: [
-            '--no-sandbox',
-            '--disable-setuid-sandbox',
-            '--disable-dev-shm-usage',
-            '--single-process'
-        ],
-    });
+    let browser;
+    try {
+        browser = await puppeteer.launch({
+            headless: true,
+            args: [
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                '--disable-dev-shm-usage',
+                '--single-process'
+            ],
+        });
+    } catch (error) {
+        res.status(500).send('Internal server error');
+        return;
+    }
     const page = await browser.newPage();
 
     // catch all error handling for now
@@ -66,10 +76,47 @@ app.get('/bmichart', async (req, res) => {
         const el = document.querySelector(selectorToRemove);
         el.parentElement.removeChild(el);
     }, selectorToRemove);
-    const screenshot = await element.screenshot(); // take screenshot of chart
-    await browser.close();
 
-    res.status(200).send(screenshot);
+    let screenshotPath = `./tmp/${moment()}.png`;
+
+    try {
+        await element.screenshot({ path: screenshotPath }); // take screenshot of chart
+        await browser.close();
+    } catch (error) {
+        res.status(500).send('Error fetching chart');
+        return;
+    }
+    let doc;
+    try {
+        doc = await generatePDF(data, screenshotPath);
+        (doc).pipe(res);
+    } catch (error) {
+        res.status(500).send('Error generating PDF');
+    } finally {
+        fs.unlink(screenshotPath, () => console.log(`File (\'${screenshotPath}\') deleted.`));
+    }
+    // res.setHeader('Content-Type', 'application/pdf');
 });
+
+const generatePDF = async (data, path) => {
+    // Create a document
+    const doc = new PDFDocument();
+    // Embed a font, set the font size, and render some text
+    doc
+        .font('Times-Roman')
+        .fontSize(14)
+        .text(`Date: ${moment().format('MM/DD/YYYY')} | Age: ${Math.floor(parseInt(data.age) / 12)} yrs ${parseInt(data.age) % 12} mos | Weight: ${data.weight} ${data.system === 'english' ? 'lbs' : 'kg'} | Height: ${data.height} ${data.system === 'english' ? 'in' : 'cm'}`);
+
+    // Add an image, constrain it to a given size, and center it vertically and horizontally
+    doc.image(path, 10, 100, {
+        fit: [600, 650],
+        align: 'center',
+        valign: 'center'
+    });
+
+    doc.end();
+
+    return doc;
+};
 
 app.listen(port, () => console.log(`Listening on port ${port}`));
