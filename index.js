@@ -61,10 +61,13 @@ app.get('/bmichart', async (req, res) => {
     // catch all error handling for now
     // error likely due to params being of incorrect types
     try {
+        console.log("Connecting to BMI chart image source...")
         await page.goto(`${baseURL}method=${data.system}&gender=${data.gender}&age_y=0&age_m=${data.age}&h${data.system === 'metric' ? 'cm' : 'inches'}=${data.height}&${data.system === 'metric' ? 'wkg' : 'twp'}=${data.weight}`,
             { timeout: 60000, waitUntil: 'domcontentloaded' });
+        console.log("Connected to source.")
     } catch {
         res.status(500).send('Error fetching chart');
+        return;
     }
     // wait for selector to load
     await page.waitForSelector(selector);
@@ -80,19 +83,24 @@ app.get('/bmichart', async (req, res) => {
     let screenshotPath = `./tmp/${moment()}.png`;
 
     try {
+        console.log("Capturing BMI chart...");
         await element.screenshot({ path: screenshotPath }); // take screenshot of chart
         await browser.close();
+        console.log("Captured BMI chart");
     } catch (error) {
         res.status(500).send('Error fetching chart');
         return;
     }
     let doc;
     try {
+        console.log("Generating PDF...");
         doc = await generatePDF(data, screenshotPath);
+        console.log("Generated PDF.");
         (doc).pipe(res);
     } catch (error) {
         res.status(500).send('Error generating PDF');
     } finally {
+        console.log("Deleting temporary file...");
         fs.unlink(screenshotPath, () => console.log(`File (\'${screenshotPath}\') deleted.`));
     }
     // res.setHeader('Content-Type', 'application/pdf');
