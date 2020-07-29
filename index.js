@@ -84,7 +84,7 @@ app.get('/bmichart', async (req, res) => {
 
     try {
         console.log("Capturing BMI chart...");
-        await element.screenshot({ path: screenshotPath }); // take screenshot of chart
+        await element.screenshot({ path: screenshotPath }, { timeout: 60000, waitUntil: 'domcontentloaded' }); // take screenshot of chart
         await browser.close();
         console.log("Captured BMI chart");
     } catch (error) {
