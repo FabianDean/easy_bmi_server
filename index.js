@@ -80,11 +80,11 @@ app.get('/bmichart', async (req, res) => {
         el.parentElement.removeChild(el);
     }, selectorToRemove);
 
-    let screenshotPath = `./tmp/${moment()}.png`;
+    let screenshotPath = `./${moment()}.png`;
 
     try {
         console.log("Capturing BMI chart...");
-        await element.screenshot({ path: screenshotPath }, { timeout: 60000, waitUntil: 'domcontentloaded' }); // take screenshot of chart
+        await element.screenshot({ path: screenshotPath }); // take screenshot of chart
         await browser.close();
         console.log("Captured BMI chart");
     } catch (error) {
